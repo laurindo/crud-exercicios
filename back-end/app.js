@@ -1,7 +1,19 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const connection = require('./config/database');
 const PORT = 3000;
 const app = express();
+
+// CONFIGURATION MONGOOSE
+const connectionInstance = mongoose.createConnection(connection.URL);
+connectionInstance.on('open', () => {
+    console.log('connected');
+});
+
+connectionInstance.on('error', () => {
+    console.log('connection failed');
+});
 
 app.use(bodyParser.json());
 
@@ -9,21 +21,25 @@ app.get('/', (req, res) => {
     res.json('ola meus pequenos gafanhotos!!!!!');
 });
 
-app.get('/list-accounts', (req, res) => {
-    res.json([{
-        id: 123,
-        name: 'account 01',
-        description: 'description khkjhjkhkj'
-    }, {
-        id: 321,
-        name: 'account 02',
-        description: 'asdasda xxxxddd'
-    }]);
+app.get('/accounts', (req, res) => {
+    connectionInstance.db.collection('accounts').find({}).toArray((error, documents) => {
+        if (error) {
+            return res.status(400).json('error');
+        }
+        res.json(documents);
+    });
 });
 
 app.post('/account', (req, res) => {
-    console.log(req.body);
-    res.json('created...');
+    const data = req.body;
+    const options = {};
+    const callback = (error, documentCreated) => {
+        if (error) {
+            return res.status(400).json(error);
+        }
+        res.json(documentCreated);
+    };
+    connectionInstance.db.collection('accounts').insertOne(data, options, callback);
 });
 
 app.put('/account', (req, res) => {
