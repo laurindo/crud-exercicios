@@ -30,6 +30,27 @@ app.get('/accounts', (req, res) => {
     });
 });
 
+app.get('/account', (req, res) => {
+    connectionInstance.db.collection('accounts').find({}).toArray((error, documents) => {
+        if (error) {
+            return res.status(400).json('error');
+        }
+        res.json(documents);
+    });
+});
+
+app.get('/account/:id', (req, res) => {
+    const id = req.params.id;
+    const filter = { _id: mongoose.Types.ObjectId(id) };
+    const callback = (error, documents) => {
+        if (error) {
+            return res.status(400).json('error');
+        }
+        res.json(documents);
+    };
+    connectionInstance.db.collection('accounts').findOne(filter, callback);
+});
+
 app.post('/account', (req, res) => {
     const data = req.body;
     const options = {};
@@ -43,15 +64,30 @@ app.post('/account', (req, res) => {
 });
 
 app.put('/account', (req, res) => {
-    console.log(req.body);
-    const data = req.body;
-    data.name = "account 03 updated";
-    res.json(data);
+   const id = req.query.id;
+   const data = { $set: req.body };
+   const filter = { _id: mongoose.Types.ObjectId(id) };
+   const options = {};
+   const callback = (error, documentUpdated) => {
+       if (error) {
+        return res.status(400).json(error);
+       }
+       res.json(documentUpdated);
+   };
+   connectionInstance.db.collection('accounts').updateOne(filter, data, options, callback);
 });
 
 app.delete('/account', (req, res) => {
-    const query = req.query;
-    res.json(query);
+    const id = req.query.id;
+    const options = {};
+    const filter = { _id: mongoose.Types.ObjectId(id) };
+    const callback = (error, documentDeleted) => {
+        if (error) {
+            return res.status(400).json(error);
+        }
+        res.json(documentDeleted);
+    };
+    connectionInstance.db.collection('accounts').deleteOne(filter, options, callback);
 });
 
 const callback = () => {
