@@ -7,7 +7,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Node JS Debug",
             "program": "${workspaceFolder}\\app.js",
             "env": {
                 "NODE_ENV": "dev",
